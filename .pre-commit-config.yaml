@@ -1,63 +1,52 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.5.0
     hooks:
       - id: check-ast
+        always_run: true
+        exclude: \.obfuscated\.py$
       - id: trailing-whitespace
+        always_run: true
+        exclude: .bumpversion.cfg
       - id: check-docstring-first
+        always_run: true
       - id: check-json
-      - id: check-added-large-files
+        always_run: true
       - id: check-yaml
+        always_run: true
       - id: check-merge-conflict
+        always_run: true
+        args: ['--assume-in-merge']
       - id: check-executables-have-shebangs
+        always_run: true
       - id: debug-statements
-      - id: name-tests-test
-        exclude: ^(tests/syft/lib/allowlist_report.py)
-      - id: requirements-txt-fixer
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.1
-    hooks:
-      - id: flake8
-        # additional_dependencies:
-        # - flake8-kwarger
-        # - darglint
-        exclude: ^(src/syft/proto|examples/duet)
-  - repo: https://github.com/psf/black
-    rev: 20.8b1
-    hooks:
-      - id: black
-        exclude: ^(src/syft/proto|examples/duet)
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.812
-    hooks:
-      - id: mypy
-        exclude: ^(src/syft/proto|tests/syft/lib/python|examples/duet|pygrid)
-        args: [
-            "--ignore-missing-imports",
-            "--scripts-are-modules",
-            "--disallow-incomplete-defs",
-            "--no-implicit-optional",
-            "--warn-unused-ignores",
-            "--warn-redundant-casts",
-            "--strict-equality",
-            "--warn-unreachable",
-            # "--disallow-untyped-decorators",
-            "--disallow-untyped-defs",
-            "--disallow-untyped-calls",
-          ]
+        always_run: true
+        exclude: \.obfuscated\.py$
+      - id: mixed-line-ending
+        args: ['--fix=lf']
 
-  - repo: local
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.12.9
     hooks:
-      - id: flynt
-        name: flynt
-        entry: flynt
-        args: [--fail-on-change]
-        types: [python]
-        language: python
-        additional_dependencies:
-          - flynt
-  - repo: https://github.com/pycqa/isort
-    rev: 5.8.0
+      - id: ruff-check
+        args: [--fix, --exit-non-zero-on-fix, --show-fixes, --unsafe-fixes]
+        types_or: [python, pyi] # TODO enable for jupyter
+        exclude: (^ci/|\.obfuscated\.py$)
+      - id: ruff-format
+        types_or: [python, pyi] # TODO enable for jupyter
+        exclude: (^ci/|\.obfuscated\.py$)
+
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
     hooks:
-      - id: isort
-        name: isort (python)
+      - id: nbstripout
+        exclude: ^(ci/|test_outputs/)
+
+  - repo: https://github.com/pre-commit/mirrors-prettier # This repository has been archived by the owner on Apr 11, 2024. It is now read-only.
+    rev: 'v3.0.0-alpha.9-for-vscode'
+    hooks:
+      - id: prettier
+        # migrations/history/ holds release artifacts that CD writes and commits
+        # during a release, without pre-commit; they are frozen, never formatted.
+        exclude: (\.min\.(js|css)$|^ci/|^test_outputs/|^packages/syft-datasets/tests/migrations/(p2p|unit)/fixtures/|/migrations/history/)
